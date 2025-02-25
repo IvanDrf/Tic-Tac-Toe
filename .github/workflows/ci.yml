@@ -24,8 +24,9 @@ jobs:
           cd App
           mkdir build
           cd build
-          cmake ..
+          cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON ..
           make
+          cp compile_commands.json ../..
 
   clang-tidy:
     runs-on: ubuntu-latest
@@ -33,16 +34,15 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Install Clang-Tidy
+      - name: Install dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install clang-tidy
+          sudo apt-get install clang-tidy libsfml-dev
 
       - name: clang-Tidy
         run: |
-          clang-tidy App/*.cpp App/*.hpp App/ClearButton/*.hpp App/ClearButton/*.cpp \
-          App/Field/*.hpp App/Field/*.cpp App/TurnWindow/*.hpp App/TurnWindow/*.cpp \
-           -- -std=c++20 -I/usr/include/SFML
+          clang-tidy -p . App/*.cpp App/*.hpp App/ClearButton/*.hpp App/ClearButton/*.cpp \
+          App/Field/*.hpp App/Field/*.cpp App/TurnWindow/*.hpp App/TurnWindow/*.cpp
 
   clang-format:
     runs-on: ubuntu-latest
@@ -58,6 +58,6 @@ jobs:
       - name: clang-format
         run: |
           clang-format --dry-run -Werror \
-            clang-tidy App/*.cpp App/*.hpp App/ClearButton/*.hpp App/ClearButton/*.cpp \
+            App/*.cpp App/*.hpp App/ClearButton/*.hpp App/ClearButton/*.cpp \
             App/Field/*.hpp App/Field/*.cpp App/TurnWindow/*.hpp App/TurnWindow/*.cpp \
-            main.cpp Mode.hpp Mode.cpp
+            main.cpp Window.hpp Window.cpp
