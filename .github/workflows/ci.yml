@@ -57,7 +57,4 @@ jobs:
 
       - name: clang-format
         run: |
-          clang-format --dry-run -Werror \
-            App/*.cpp App/*.hpp App/ClearButton/*.hpp App/ClearButton/*.cpp \
-            App/Field/*.hpp App/Field/*.cpp App/TurnWindow/*.hpp App/TurnWindow/*.cpp \
-            main.cpp Window.hpp Window.cpp
+          find App -name '*.cpp' -o -name '*.hpp' | xargs clang-format --dry-run -Werror
