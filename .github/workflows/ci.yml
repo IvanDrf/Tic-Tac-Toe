@@ -1,0 +1,62 @@
+name: Clang Check
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up CMake
+        uses: jwlawson/actions-setup-cmake@v1
+        with:
+          cmake-version: '3.20.0'
+
+      - name: Install SFML
+        run: |
+          sudo apt-get update
+          sudo apt-get install libsfml-dev
+
+      - name: Build project
+        run: |
+          mkdir build
+          cd build
+          cmake ..
+          make
+
+  clang-tidy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Install Clang-Tidy
+        run: |
+          sudo apt-get update
+          sudo apt-get install clang-tidy
+
+      - name: clang-Tidy
+        run: |
+          clang-tidy App/*.cpp App/*.hpp App/ClearButton/*.hpp App/ClearButton/*.cpp \
+          App/Field/*.hpp App/Field/*.cpp App/TurnWindow/*.hpp App/TurnWindow/*.cpp \
+           -- -std=c++20 -I/usr/include/SFML
+
+  clang-format:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Install clang-format
+        run: |
+          sudo apt-get update
+          sudo apt-get install clang-format
+
+      - name: clang-format
+        run: |
+          clang-format --dry-run -Werror \
+            clang-tidy App/*.cpp App/*.hpp App/ClearButton/*.hpp App/ClearButton/*.cpp \
+            App/Field/*.hpp App/Field/*.cpp App/TurnWindow/*.hpp App/TurnWindow/*.cpp \
+            main.cpp Mode.hpp Mode.cpp
