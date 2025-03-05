@@ -1,0 +1,60 @@
+name: Clang Check
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up CMake
+        uses: jwlawson/actions-setup-cmake@v1
+        with:
+          cmake-version: '3.20.0'
+
+      - name: Install SFML
+        run: |
+          sudo apt-get update
+          sudo apt-get install libsfml-dev
+
+      - name: Build project
+        run: |
+          cd App
+          mkdir build
+          cd build
+          cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON ..
+          make
+          cp compile_commands.json ../..
+
+  clang-tidy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install clang-tidy libsfml-dev
+
+      - name: clang-Tidy
+        run: |
+          clang-tidy -p . App/*.cpp App/*.hpp App/ClearButton/*.hpp App/ClearButton/*.cpp \
+          App/Field/*.hpp App/Field/*.cpp App/TurnWindow/*.hpp App/TurnWindow/*.cpp
+
+  clang-format:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Install clang-format
+        run: |
+          sudo apt-get update
+          sudo apt-get install clang-format
+
+      - name: clang-format
+        run: |
+          find App -name '*.cpp' -o -name '*.hpp' | xargs clang-format --dry-run -Werror
